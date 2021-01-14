@@ -1,18 +1,17 @@
 {
-    "name": "marx/filepath",
-    "description": "filepath lib",
+    "name": "marx/tplib",
+    "description": "thinkphp5.1 lib",
     "type": "library",
-    "license": "MIT",
     "authors": [
         {
             "name": "Marx",
             "email": "marx_88@126.com"
         }
     ],
+    "autoload": {
+        "psr-4": {"marx\\":""}
+    },
     "require": {
         "topthink/framework": "5.1.*"
-    },
-    "autoload": {
-        "psr-4": {"marx\\filepath\\":""}
     }
 }
