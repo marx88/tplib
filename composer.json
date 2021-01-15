@@ -18,6 +18,7 @@
         }
     ],
     "require": {
+        "php":"7.2.*",
         "topthink/framework": "5.1.*",
         "mphp/tool": "dev-master"
     }
