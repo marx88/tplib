@@ -1,14 +1,14 @@
 <?php
 
-namespace marx\lock;
+namespace mphp\tplib\lock;
 
 use think\Exception;
 
 /**
  * 互斥锁.
- * 
+ *
  * 根据key进行上锁、解锁，上锁后其它上锁会返回失败
- * 
+ *
  * 目前用文件锁，后期可抽象接口，扩展锁类型：redis锁等
  */
 class MutexLock
@@ -34,6 +34,8 @@ class MutexLock
 
     /**
      * MutexLock destructor.
+     *
+     * @throws Exception
      */
     public function __destruct()
     {
@@ -63,13 +65,14 @@ class MutexLock
     public function get()
     {
         $this->locked = flock($this->fp, LOCK_EX | LOCK_NB);
-        trace('尝试获取文件锁，结果：'.($this->locked ? 'true' : 'false'), 'debug');
 
         return $this->locked;
     }
 
     /**
      * 释放锁
+     *
+     * @throws Exception
      */
     public function free()
     {
@@ -78,11 +81,10 @@ class MutexLock
         }
 
         if (false === flock($this->fp, LOCK_UN)) {
-            trace('释放文件锁失败', 'error');
-        } else {
-            $this->locked = false;
-            trace('成功释放文件锁', 'debug');
+            exception('释放互斥锁失败');
         }
+
+        $this->locked = false;
     }
 
     /**
@@ -142,9 +144,7 @@ class MutexLock
         }
 
         if (!is_dir($path)) {
-            trace('获取互斥锁所在路径失败：'.$path, 'error');
-
-            throw new Exception('获取互斥锁失败');
+            exception('创建互斥锁失败');
         }
     }
 
@@ -159,9 +159,7 @@ class MutexLock
     {
         $this->fp = fopen($path.$this->fileName, 'w+');
         if (false === $this->fp) {
-            trace('打开互斥锁文件失败：'.$path, 'error');
-
-            throw new Exception('获取互斥锁失败');
+            exception('读取互斥锁失败');
         }
     }
 }

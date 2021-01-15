@@ -1,8 +1,9 @@
 <?php
 
-namespace marx\upload;
+namespace mphp\tplib\upload;
 
-use marx\filepath\Path;
+use mphp\tool\path\File as FileTool;
+use mphp\tool\path\Path;
 use think\exception\ValidateException;
 use think\File;
 
@@ -26,8 +27,7 @@ class Upload
     public static $urlPre = '/upload/';
 
     /**
-     * 上传文件 返回url路径
-     * 调用static::urlToPath转物理路径.
+     * 上传文件并返回url路径.
      *
      * @param File   $file
      * @param array  $validate
@@ -43,12 +43,12 @@ class Upload
             throw new ValidateException("{$type}异常");
         }
 
-        $info = $file->validate($validate)->move(Path::splicingRoot(static::$pathPre));
+        $info = $file->validate($validate)->move(static::rootPath());
         if (!$info) {
             throw new ValidateException($file->getError() ?: "{$type}上传失败");
         }
 
-        return Path::toURL($info->getSaveName(), static::$urlPre);
+        return Path::fmtSlip(static::$urlPre.'/'.$info->getSaveName());
     }
 
     /**
@@ -76,7 +76,7 @@ class Upload
             }
         } catch (ValidateException $e) {
             foreach ($uploads as $value) {
-                Path::deleteFile(static::urlToPath($value));
+                FileTool::deleteFile(static::urlToPath($value));
             }
 
             throw $e;
@@ -86,16 +86,25 @@ class Upload
     }
 
     /**
-     * url转path
-     * 注意：该path不是物理路径，需要拼接项目根路径.
+     * url转完整物理路径.
      *
-     * @param string $path
+     * @param string $url
      *
      * @return string
      */
-    public static function urlToPath($path)
+    public static function urlToPath($url)
     {
-        return str_replace(static::$urlPre, static::$pathPre, $path);
+        return Path::fmt(str_replace(static::$urlPre, static::rootPath(), $url));
+    }
+
+    /**
+     * 上传根路径.
+     *
+     * @return string
+     */
+    public static function rootPath()
+    {
+        return Path::fmt(env('root_path').static::$pathPre);
     }
 
     /**
